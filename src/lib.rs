@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_imports)]
 
 //define git commands as functions to use
 pub mod git {
@@ -12,7 +13,34 @@ pub mod git {
 pub mod pkg {
     use crate::git;
     use std::process::Command as cmd;
+    use std::path::PathBuf;
     use std::fs;
+
+    //read the source=() field from the PKGBUILD file
+    pub fn get_source(input: &String) -> String {
+        let PKGBUILD = fs::read_to_string(&input).expect("Unable to find or read PKGBUILD file!");
+
+        let mut source: String = Default::default();
+        let mut source_count = 0;
+
+        for line in PKGBUILD.lines() {
+
+            if line.starts_with("source=") {
+                if ! line.ends_with(")") {
+                    source.push_str(&line);
+                    source_count += 1;
+                }
+            } else if source_count > 0 {
+                if line.ends_with(")") {
+                    source_count = 0
+                }
+                source.push_str(&line);
+            }
+
+        }
+
+        source
+    }
 
     //filter package argument into a url if it isn't already formatted as one
     pub fn filter_input(input: &String) -> String {
@@ -35,13 +63,17 @@ pub mod pkg {
         cmd::new("makepkg").current_dir(&input).arg("-si").status().expect("Unable to execute makepkg!");
     }
 
+    //cleanup build dir
     pub fn cleanup(input: &String) {
         fs::remove_dir_all(&input).expect("Unable to cleanup repo!");
     }
 
+    //remove package from system (-R)
     pub fn remove(input: String) {
         cmd::new("sudo").arg("pacman").arg("-R").arg(&input).status().expect("Unable to execute sudo!");
     }
+
+    //sync package to system (-S)
     pub fn sync(input: String) {
         println!("Cloning repository...");
         clone_pkg(&filter_input(&input));
@@ -54,3 +86,7 @@ pub mod pkg {
 }
 
 //TODO: add aur mod to search pkgs
+
+pub mod aur {
+
+}
