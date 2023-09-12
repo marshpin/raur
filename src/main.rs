@@ -1,13 +1,13 @@
 extern crate clap;
 
 use clap::{Command, ArgGroup, arg};
-use raur::pkg::sync;
+use raur::pkg::{sync, remove};
 
 fn main() {
     let raur = Command::new("raur")
         .args(&[
-            arg!(-s --sync <PACKAGE> "Syncs AUR repository to system."),
-            arg!(-r --remove <PACKAGE> "Removes synced package from system.")
+            arg!(-S --sync <PACKAGE> "Syncs AUR repository to system."),
+            arg!(-R --remove <PACKAGE> "Removes synced package from system.")
         ])
         .groups(&[
             ArgGroup::multiple(ArgGroup::new("syncargs").args(["sync"]), true),
@@ -17,5 +17,7 @@ fn main() {
 
     if let Some(pkg_name) = raur.get_one::<String>("sync") {
         sync(pkg_name.to_string());
+    } else if let Some(pkg_name) = raur.get_one::<String>("remove") {
+        remove(pkg_name.to_string());
     }
 }

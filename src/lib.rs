@@ -4,7 +4,7 @@ pub mod git {
     use std::process::Command as cmd;
 
     pub fn clone(url: &String){
-        cmd::new("git").arg("clone").arg(url).output().expect("Unable to clone git repository!");
+        cmd::new("git").arg("clone").arg(&url).output().expect("Unable to clone git repository!");
     }
 }
 
@@ -39,9 +39,16 @@ pub mod pkg {
         fs::remove_dir_all(&input).expect("Unable to cleanup repo!");
     }
 
+    pub fn remove(input: String) {
+        cmd::new("sudo").arg("pacman").arg("-R").arg(&input).status().expect("Unable to execute sudo!");
+    }
     pub fn sync(input: String) {
+        println!("Cloning repository...");
         clone_pkg(&filter_input(&input));
+        println!("Repository successfully cloned!");
+        println!("Making package...");
         make_pkg(&input);
         cleanup(&input);
+        println!("Cleaning up...")
     }
 }
