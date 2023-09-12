@@ -52,3 +52,5 @@ pub mod pkg {
         println!("Cleaning up...")
     }
 }
+
+//TODO: add aur mod to search pkgs
