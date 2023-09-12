@@ -10,8 +10,8 @@ fn main() {
             arg!(-R --remove <PACKAGE> "Removes synced package from system.")
         ])
         .groups(&[
-            ArgGroup::multiple(ArgGroup::new("syncargs").args(["sync"]), true),
-            ArgGroup::multiple(ArgGroup::new("removeargs").args(["remove"]), true)
+            ArgGroup::multiple(ArgGroup::new("sync_args").args(["sync"]), true),
+            ArgGroup::multiple(ArgGroup::new("remove_args").args(["remove"]), true)
         ])
     .get_matches();
 
