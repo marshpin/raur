@@ -5,7 +5,7 @@ pub mod git {
     use std::process::Command as cmd;
 
     pub fn clone(url: &String){
-        cmd::new("git").arg("clone").arg(&url).output().expect("Unable to clone git repository!");
+        cmd::new("git").arg("clone").arg("--depth 1").arg(&url).output().expect("Unable to clone git repository!");
     }
 }
 
