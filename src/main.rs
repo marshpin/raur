@@ -1,7 +1,5 @@
 extern crate clap;
 
-use std::path::PathBuf;
-
 use clap::{Command, ArgGroup, arg};
 use raur::pkg::{sync, remove, get_source};
 
@@ -23,7 +21,7 @@ fn main() {
         sync(pkg_name.to_string());
     } else if let Some(pkg_name) = raur.get_one::<String>("remove") {
         remove(pkg_name.to_string());
-    } else if let Some(pkg_name) = raur.get_one::<String>("test") {
+    } else if let Some(_pkg_name) = raur.get_one::<String>("test") {
         println!("{}", get_source(&String::from("PKGBUILD")));
     }
 }

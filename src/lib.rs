@@ -1,11 +1,15 @@
-#![allow(dead_code, unused_imports)]
-
 //define git commands as functions to use
 pub mod git {
     use std::process::Command as cmd;
 
-    pub fn clone(url: &String){
-        cmd::new("git").arg("clone").arg("--depth 1").arg(&url).output().expect("Unable to clone git repository!");
+    pub fn clone(url: &String) -> Result<&str, &str> {
+        let output = cmd::new("git").arg("clone").arg("--depth").arg("1").arg(&url).output().expect("Unable to clone git repository!");
+        if ! output.status.success() {
+            println!("{}", String::from_utf8_lossy(&output.stderr));
+            Err("Failed to clone repository! Exiting...")
+        } else {
+            Ok("Cloned successfully!")
+        }
     }
 }
 
@@ -13,17 +17,16 @@ pub mod git {
 pub mod pkg {
     use crate::git;
     use std::process::Command as cmd;
-    use std::path::PathBuf;
     use std::fs;
 
     //read the source=() field from the PKGBUILD file
     pub fn get_source(input: &String) -> String {
-        let PKGBUILD = fs::read_to_string(&input).expect("Unable to find or read PKGBUILD file!");
+        let pkgbuild = fs::read_to_string(&input).expect("Unable to find or read PKGBUILD file!");
 
         let mut source: String = Default::default();
         let mut source_count = 0;
 
-        for line in PKGBUILD.lines() {
+        for line in pkgbuild.lines() {
 
             if line.starts_with("source=") {
                 if ! line.ends_with(")") {
@@ -43,19 +46,17 @@ pub mod pkg {
     }
 
     //filter package argument into a url if it isn't already formatted as one
+    // TODO: replace git clone system to use AUR search api instead of... whatever this is
     pub fn filter_input(input: &String) -> String {
         //assumes that if the input does not start with an AUR repo link, the package name is bare
-        //filter will be updated later to be better
+        let mut string = input.to_owned();
         if ! input.starts_with("https://aur.archlinux.org/") {
-            format!("{}{}", &"https://aur.archlinux.org/", &input)
-        } else {
-            input.to_string()
+            if ! input.ends_with(".git") {
+                string = format!("{}{}", &string, &".git");
+            }
+            string = format!("{}{}", &"https://aur.archlinux.org/", &string);
         }
-    }
-
-    //git clone package to system
-    pub fn clone_pkg(input: &String) {
-        git::clone(input);
+        string
     }
 
     //execute makepkg -si in PKGBUILD directory
@@ -76,8 +77,10 @@ pub mod pkg {
     //sync package to system (-S)
     pub fn sync(input: String) {
         println!("Cloning repository...");
-        clone_pkg(&filter_input(&input));
-        println!("Repository successfully cloned!");
+        match git::clone(&filter_input(&input)) {
+            Ok(t) => println!("{}", t),
+            Err(e) => panic!("{}", e)
+        };
         println!("Making package...");
         make_pkg(&input);
         cleanup(&input);
