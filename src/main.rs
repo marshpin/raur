@@ -1,7 +1,10 @@
 extern crate clap;
 
+pub mod pkg;
+pub mod git;
+
 use clap::{Command, ArgGroup, arg};
-use raur::pkg::{sync, remove, get_source};
+use pkg::{sync, remove, get_source};
 
 fn main() {
     let raur = Command::new("raur")
