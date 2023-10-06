@@ -31,11 +31,6 @@ pub fn cleanup(input: &String) {
     fs::remove_dir_all(&input).expect("Unable to cleanup repo!");
 }
 
-//remove package from system (-R)
-pub fn remove(input: String) {
-    cmd::new("sudo").arg("pacman").arg("-R").arg(&input).status().expect("Unable to execute sudo!");
-}
-
 //sync package to system (-S)
 pub fn sync(input: String) {
     println!("Cloning repository...");
